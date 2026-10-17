@@ -1,0 +1,76 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: ms-gateway
+
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+
+            - id: ms-securityservice
+              uri: lb://ms-securityservice
+              predicates:
+                - Path=/auth/**
+              filters:
+                - SetRequestHeader=X-Gateway-Secret, ${gateway.internal-secret}
+
+            - id: ms-patron
+              uri: lb://ms-patron
+              predicates:
+                - Path=/ciudadanos/**,/padron/**
+              filters:
+                - SetRequestHeader=X-Gateway-Secret, ${gateway.internal-secret}
+
+            - id: ms-votacion
+              uri: lb://ms-votacion
+              predicates:
+                - Path=/elecciones/**,/candidatos/**,/votos/**
+              filters:
+                - SetRequestHeader=X-Gateway-Secret, ${gateway.internal-secret}
+
+            - id: swagger-seguridad
+              uri: lb://ms-securityservice
+              predicates:
+                - Path=/seguridad/**
+              filters:
+                - StripPrefix=1
+                - SetRequestHeader=X-Gateway-Secret, ${gateway.internal-secret}
+
+            - id: swagger-patron
+              uri: lb://ms-patron
+              predicates:
+                - Path=/patron/**
+              filters:
+                - StripPrefix=1
+                - SetRequestHeader=X-Gateway-Secret, ${gateway.internal-secret}
+
+            - id: swagger-votacion
+              uri: lb://ms-votacion
+              predicates:
+                - Path=/votacion/**
+              filters:
+                - StripPrefix=1
+                - SetRequestHeader=X-Gateway-Secret, ${gateway.internal-secret}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://registry:8761/eureka/
+
+  instance:
+    lease-renewal-interval-in-seconds: 10
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Seguridad
+        url: /seguridad/v3/api-docs
+      - name: Patron
+        url: /patron/v3/api-docs
+      - name: Votacion
+        url: /votacion/v3/api-docs
