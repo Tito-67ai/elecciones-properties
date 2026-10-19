@@ -67,6 +67,7 @@ eureka:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+    persist-authorization: true
     urls:
       - name: Seguridad
         url: /seguridad/v3/api-docs
